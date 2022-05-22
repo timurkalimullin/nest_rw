@@ -8,8 +8,8 @@ export class TagService {
     return 'This action adds a new tag';
   }
 
-  findAll() {
-    return `This action returns all tag`;
+  findAll(): string[] {
+    return ['tag1', 'tag2', 'tag3'];
   }
 
   findOne(id: number) {
