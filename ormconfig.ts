@@ -7,5 +7,7 @@ export const config: DataSourceOptions = {
   username: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PASSWORD,
   database: process.env.POSTGRES_DB,
+  uuidExtension: 'pgcrypto',
   synchronize: true,
+  entities: [__dirname + '/**/entities/*.entity{.ts,.js}'],
 };
