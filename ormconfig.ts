@@ -1,5 +1,6 @@
-import { DataSourceOptions } from 'typeorm';
+import { DataSourceOptions, DataSource } from 'typeorm';
 import path from 'path';
+import 'dotenv/config';
 
 export const config: DataSourceOptions = {
   type: 'postgres',
@@ -11,5 +12,9 @@ export const config: DataSourceOptions = {
   uuidExtension: 'pgcrypto',
   synchronize: false,
   entities: [path.join(__dirname, '/**/entities/*.entity{.ts,.js}')],
-  migrations: [path.join(__dirname, '/migrations/**/*{.ts,.js}')],
+  migrations: [path.join(__dirname, '/src/migrations/**/*{.ts,.js}')],
 };
+
+const dataSource = new DataSource(config);
+
+export default dataSource;
