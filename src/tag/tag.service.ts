@@ -11,7 +11,7 @@ export class TagService {
     @InjectRepository(Tag) private readonly repository: Repository<Tag>
   ) {}
 
-  create(createTagDto: CreateTagDto) {
+  async create(createTagDto: CreateTagDto) {
     return 'This action adds a new tag';
   }
 
