@@ -20,5 +20,5 @@
     "moduleResolution": "node",
     "esModuleInterop": true,
   },
-  "exclude": ["./src/migrations/**/*"]
+  "exclude": ["./src/migrations/**/*", "dist"]
 }
