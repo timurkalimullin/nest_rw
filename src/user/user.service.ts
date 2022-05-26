@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
+import { sign } from 'jsonwebtoken';
+import { UserResponse, UserType } from './types/UserResponse.interface';
 
 @Injectable()
 export class UserService {
@@ -14,6 +16,18 @@ export class UserService {
   async create(createUserDto: CreateUserDto): Promise<User> {
     const newUser = await this.repository.create(createUserDto);
     return await this.repository.save(newUser);
+  }
+
+  buildUserResponse(user: User): UserResponse {
+    const { password, ...rest } = user;
+    return {
+      user: { ...rest, token: this.generateJwt(user) },
+    };
+  }
+
+  generateJwt(user: UserType) {
+    const { id, username, email } = user;
+    return sign({ id, email, username }, process.env.JWT_SECRET);
   }
 
   findAll() {
