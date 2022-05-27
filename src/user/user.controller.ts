@@ -12,6 +12,7 @@ import {
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { LoginUserDto } from './dto/login-user.dto';
 import { UserResponse } from './types/UserResponse.interface';
 
 @Controller()
@@ -25,6 +26,13 @@ export class UserController {
   ): Promise<UserResponse> {
     const newUser = await this.userService.create(createUserDto);
     return this.userService.buildUserResponse(newUser);
+  }
+
+  @Post('users/login')
+  @UsePipes(new ValidationPipe())
+  async login(@Body('user') loginUserDto: LoginUserDto): Promise<UserResponse> {
+    const requiredUser = await this.userService.login(loginUserDto);
+    return this.userService.buildUserResponse(requiredUser);
   }
 
   @Get()
