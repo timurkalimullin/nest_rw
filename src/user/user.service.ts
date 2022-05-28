@@ -66,25 +66,11 @@ export class UserService {
       );
     }
 
-    delete requiredUser.password;
-
     return requiredUser;
   }
 
-  findAll() {
-    return `This action returns all user`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
-
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async findById(id: string): Promise<User | null> {
+    return await this.repository.findOne({ where: { id } });
   }
 
   // #endregion
@@ -92,8 +78,9 @@ export class UserService {
   // #region Helpers
 
   buildUserResponse(user: User): UserResponse {
+    const { password, ...rest } = user;
     return {
-      user: { ...user, token: this.generateJwt(user) },
+      user: { ...rest, token: this.generateJwt(rest) },
     };
   }
 

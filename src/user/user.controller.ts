@@ -3,17 +3,16 @@ import {
   Get,
   Post,
   Body,
-  Patch,
-  Param,
-  Delete,
   UsePipes,
   ValidationPipe,
+  Req,
+  HttpException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { UserResponse } from './types/UserResponse.interface';
+import { ExpressRequestInterface } from '../types/express.request.interface';
 
 @Controller()
 export class UserController {
@@ -35,23 +34,13 @@ export class UserController {
     return this.userService.buildUserResponse(requiredUser);
   }
 
-  @Get()
-  findAll() {
-    return this.userService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+  @Get('user')
+  async currentUser(
+    @Req() request: ExpressRequestInterface
+  ): Promise<UserResponse> {
+    if (!request.user) {
+      throw new HttpException('No current user', 422);
+    }
+    return this.userService.buildUserResponse(request.user);
   }
 }
