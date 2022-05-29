@@ -7,6 +7,7 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { UserEntity } from './entities/user.entity';
 import { sign } from 'jsonwebtoken';
 import { UserResponse, UserType } from './types/UserResponse.interface';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -71,6 +72,21 @@ export class UserService {
 
   async findById(id: string): Promise<UserEntity | null> {
     return await this.repository.findOne({ where: { id } });
+  }
+
+  async update(
+    userId: string,
+    updateUserDto: UpdateUserDto
+  ): Promise<UserEntity> {
+    const user = await this.findById(userId);
+    if (!user)
+      throw new HttpException(
+        'Unexpected db error',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+
+    const updatedUser = { ...user, ...updateUserDto };
+    return this.repository.save(updatedUser);
   }
 
   // #endregion
