@@ -13,6 +13,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { UserResponse } from './types/UserResponse.interface';
 import { ExpressRequestInterface } from '../types/express.request.interface';
+import { User } from '../decorators/user.decorator';
+import { UserEntity } from './entities/user.entity';
 
 @Controller()
 export class UserController {
@@ -35,12 +37,7 @@ export class UserController {
   }
 
   @Get('user')
-  async currentUser(
-    @Req() request: ExpressRequestInterface
-  ): Promise<UserResponse> {
-    if (!request.user) {
-      throw new HttpException('No current user', 422);
-    }
-    return this.userService.buildUserResponse(request.user);
+  async currentUser(@User() user: UserEntity): Promise<UserResponse> {
+    return this.userService.buildUserResponse(user);
   }
 }

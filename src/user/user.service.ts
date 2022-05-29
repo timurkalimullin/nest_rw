@@ -3,21 +3,21 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { compare } from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
-import { User } from './entities/user.entity';
+import { UserEntity } from './entities/user.entity';
 import { sign } from 'jsonwebtoken';
 import { UserResponse, UserType } from './types/UserResponse.interface';
 
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(User) private readonly repository: Repository<User>
+    @InjectRepository(UserEntity)
+    private readonly repository: Repository<UserEntity>
   ) {}
 
   // #region Main
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async create(createUserDto: CreateUserDto): Promise<UserEntity> {
     const userByEmail = await this.repository.findOne({
       where: {
         email: createUserDto.email,
@@ -39,7 +39,7 @@ export class UserService {
     return await this.repository.save(newUser);
   }
 
-  async login(loginUserDto: LoginUserDto): Promise<User> {
+  async login(loginUserDto: LoginUserDto): Promise<UserEntity> {
     const requiredUser = await this.repository.findOne({
       where: {
         email: loginUserDto.email,
@@ -69,7 +69,7 @@ export class UserService {
     return requiredUser;
   }
 
-  async findById(id: string): Promise<User | null> {
+  async findById(id: string): Promise<UserEntity | null> {
     return await this.repository.findOne({ where: { id } });
   }
 
@@ -77,7 +77,7 @@ export class UserService {
 
   // #region Helpers
 
-  buildUserResponse(user: User): UserResponse {
+  buildUserResponse(user: UserEntity): UserResponse {
     const { password, ...rest } = user;
     return {
       user: { ...rest, token: this.generateJwt(rest) },
