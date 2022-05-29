@@ -5,7 +5,7 @@ import { AppService } from './app.service';
 import { TagModule } from './tag/tag.module';
 import { config } from '../ormconfig';
 import { UserModule } from './user/user.module';
-import { AuthMiddleware } from './middlewares/auth.middleware';
+import { AuthMiddleware } from './common/middlewares/auth.middleware';
 
 @Module({
   imports: [TypeOrmModule.forRoot(config), TagModule, UserModule],

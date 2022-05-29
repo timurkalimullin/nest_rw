@@ -12,7 +12,7 @@ export const config: DataSourceOptions = {
   uuidExtension: 'pgcrypto',
   synchronize: false,
   entities: [path.join(__dirname, '/**/entities/*.entity{.ts,.js}')],
-  migrations: [path.join(__dirname, '/src/migrations/**/*{.ts,.js}')],
+  migrations: [path.join(__dirname, '/src/common/migrations/**/*{.ts,.js}')],
 };
 
 const dataSource = new DataSource(config);
