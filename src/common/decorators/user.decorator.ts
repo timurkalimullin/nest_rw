@@ -1,16 +1,12 @@
-import {
-  createParamDecorator,
-  ExecutionContext,
-  HttpException,
-  HttpStatus,
-} from '@nestjs/common';
+import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import { ExpressRequestInterface } from '../types/express.request.interface';
 
 export const User = createParamDecorator(
   (key: string, ctx: ExecutionContext) => {
-    const request = ctx.switchToHttp().getRequest();
+    const request = ctx.switchToHttp().getRequest<ExpressRequestInterface>();
 
     if (!request.user) {
-      throw new HttpException('Not authorized', HttpStatus.UNAUTHORIZED);
+      return null;
     }
 
     if (key) {
