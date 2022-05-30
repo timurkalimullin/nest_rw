@@ -27,14 +27,12 @@ export class ArticleEntity {
   @Column({
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP(6)',
-    nullable: false,
   })
   createdAt: Date;
 
   @Column({
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP(6)',
-    nullable: false,
   })
   updatedAt: Date;
 

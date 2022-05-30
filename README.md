@@ -35,11 +35,8 @@ $ npm install
 ## Running the app
 
 ```bash
-# development
+# development with watch mode
 $ npm run start
-
-# watch mode
-$ npm run start:dev
 
 # production mode
 $ npm run start:prod
@@ -56,6 +53,17 @@ $ npm run test:e2e
 
 # test coverage
 $ npm run test:cov
+```
+
+## Migrations
+
+```bash
+# generate migrations
+$ npm run db:generate --migration=**migration_name**
+
+# run migration
+$ npm run db:migrate
+
 ```
 
 ## Support
