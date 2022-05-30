@@ -18,16 +18,4 @@ export class TagService {
   async findAll(): Promise<Tag[]> {
     return await this.repository.find();
   }
-
-  findOne(id: number) {
-    return `This action returns a #${id} tag`;
-  }
-
-  update(id: number, updateTagDto: UpdateTagDto) {
-    return `This action updates a #${id} tag`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} tag`;
-  }
 }
