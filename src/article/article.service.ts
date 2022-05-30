@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { ArticleEntity } from './entities/article.entity';
+import { UserEntity } from '../user/entities/user.entity';
 
 @Injectable()
 export class ArticleService {
@@ -12,8 +13,16 @@ export class ArticleService {
     private readonly repository: Repository<ArticleEntity>
   ) {}
 
-  create(createArticleDto: CreateArticleDto) {
-    return 'This action adds a new article';
+  async create(
+    user: UserEntity,
+    createArticleDto: CreateArticleDto
+  ): Promise<ArticleEntity> {
+    const article = await this.repository.create({
+      ...createArticleDto,
+    });
+    article.author = user;
+    article.slug = 'random';
+    return await this.repository.save(article);
   }
 
   findAll() {
