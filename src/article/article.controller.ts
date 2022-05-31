@@ -9,6 +9,8 @@ import {
   UseGuards,
   UsePipes,
   ValidationPipe,
+  HttpStatus,
+  HttpException,
 } from '@nestjs/common';
 import { User } from 'src/common/decorators/user.decorator';
 import { UserEntity } from 'src/user/entities/user.entity';
@@ -16,7 +18,7 @@ import { ArticleService } from './article.service';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { AuthGuard } from '../common/guards/auth.guard';
-import { ArticleEntity } from './entities/article.entity';
+import { ArticleResponseinterface } from './types/articleResponse.interface';
 
 @Controller('articles')
 export class ArticleController {
@@ -28,8 +30,12 @@ export class ArticleController {
   async create(
     @User() currentUser: UserEntity,
     @Body('article') createArticleDto: CreateArticleDto
-  ): Promise<ArticleEntity> {
-    return await this.articleService.create(currentUser, createArticleDto);
+  ): Promise<ArticleResponseinterface> {
+    const article = await this.articleService.create(
+      currentUser,
+      createArticleDto
+    );
+    return this.articleService.buildArticleResponse(article);
   }
 
   @Get()
@@ -37,9 +43,15 @@ export class ArticleController {
     return this.articleService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.articleService.findOne(+id);
+  @Get(':slug')
+  async findOne(
+    @Param('slug') slug: string
+  ): Promise<ArticleResponseinterface> {
+    const article = await this.articleService.findOne(slug);
+    if (!article)
+      throw new HttpException('No article found', HttpStatus.NOT_FOUND);
+
+    return this.articleService.buildArticleResponse(article);
   }
 
   @Patch(':id')

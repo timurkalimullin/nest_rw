@@ -5,6 +5,8 @@ import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { ArticleEntity } from './entities/article.entity';
 import { UserEntity } from '../user/entities/user.entity';
+import { ArticleResponseinterface } from './types/articleResponse.interface';
+import { generateSlug } from '../common/helpers';
 
 @Injectable()
 export class ArticleService {
@@ -12,6 +14,8 @@ export class ArticleService {
     @InjectRepository(ArticleEntity)
     private readonly repository: Repository<ArticleEntity>
   ) {}
+
+  //#region Main
 
   async create(
     user: UserEntity,
@@ -21,7 +25,7 @@ export class ArticleService {
       ...createArticleDto,
     });
     article.author = user;
-    article.slug = 'random';
+    article.slug = generateSlug(article.title);
     return await this.repository.save(article);
   }
 
@@ -29,8 +33,11 @@ export class ArticleService {
     return `This action returns all article`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} article`;
+  async findOne(slug: string): Promise<ArticleEntity | null> {
+    return await this.repository.findOne({
+      where: { slug },
+      relations: { author: true },
+    });
   }
 
   update(id: number, updateArticleDto: UpdateArticleDto) {
@@ -40,4 +47,14 @@ export class ArticleService {
   remove(id: number) {
     return `This action removes a #${id} article`;
   }
+
+  //#endregion
+
+  //#region Helpers
+
+  buildArticleResponse(article: ArticleEntity): ArticleResponseinterface {
+    return { article };
+  }
+
+  //#endregion
 }
