@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { ArticleEntity } from './entities/article.entity';
@@ -36,7 +36,6 @@ export class ArticleService {
   async findOne(slug: string): Promise<ArticleEntity | null> {
     return await this.repository.findOne({
       where: { slug },
-      relations: { author: true },
     });
   }
 
@@ -44,8 +43,20 @@ export class ArticleService {
     return `This action updates a #${id} article`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} article`;
+  async remove(user: UserEntity, slug: string): Promise<DeleteResult> {
+    const currentArticle = await this.findOne(slug);
+
+    if (!currentArticle) {
+      throw new HttpException('No article found', HttpStatus.NOT_FOUND);
+    }
+
+    if (currentArticle?.author.id !== user.id) {
+      throw new HttpException(
+        'no permission for dlete articles',
+        HttpStatus.FORBIDDEN
+      );
+    }
+    return await this.repository.delete({ slug });
   }
 
   //#endregion

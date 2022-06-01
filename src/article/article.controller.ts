@@ -59,8 +59,9 @@ export class ArticleController {
     return this.articleService.update(+id, updateArticleDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.articleService.remove(+id);
+  @Delete(':slug')
+  @UseGuards(AuthGuard)
+  async remove(@User() currentUser: UserEntity, @Param('slug') slug: string) {
+    return await this.articleService.remove(currentUser, slug);
   }
 }
