@@ -22,7 +22,6 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('users')
-  @UsePipes(new ValidationPipe({ whitelist: true }))
   async create(
     @Body('user') createUserDto: CreateUserDto
   ): Promise<UserResponse> {
@@ -31,7 +30,6 @@ export class UserController {
   }
 
   @Post('users/login')
-  @UsePipes(new ValidationPipe())
   async login(@Body('user') loginUserDto: LoginUserDto): Promise<UserResponse> {
     const requiredUser = await this.userService.login(loginUserDto);
     return this.userService.buildUserResponse(requiredUser);
@@ -45,7 +43,6 @@ export class UserController {
 
   @Put('user')
   @UseGuards(AuthGuard)
-  @UsePipes(new ValidationPipe({ whitelist: true }))
   async updateUser(
     @User() user: UserEntity,
     @Body('user') updateUserDto: UpdateUserDto

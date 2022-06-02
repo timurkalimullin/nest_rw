@@ -3,14 +3,12 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   UseGuards,
-  UsePipes,
-  ValidationPipe,
   HttpStatus,
   HttpException,
+  Put,
 } from '@nestjs/common';
 import { User } from 'src/common/decorators/user.decorator';
 import { UserEntity } from 'src/user/entities/user.entity';
@@ -18,7 +16,7 @@ import { ArticleService } from './article.service';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { AuthGuard } from '../common/guards/auth.guard';
-import { ArticleResponseinterface } from './types/articleResponse.interface';
+import { ArticleResponseInterface } from './types/articleResponse.interface';
 
 @Controller('articles')
 export class ArticleController {
@@ -26,11 +24,10 @@ export class ArticleController {
 
   @Post()
   @UseGuards(AuthGuard)
-  @UsePipes(new ValidationPipe({ whitelist: true }))
   async create(
     @User() currentUser: UserEntity,
     @Body('article') createArticleDto: CreateArticleDto
-  ): Promise<ArticleResponseinterface> {
+  ): Promise<ArticleResponseInterface> {
     const article = await this.articleService.create(
       currentUser,
       createArticleDto
@@ -38,15 +35,10 @@ export class ArticleController {
     return this.articleService.buildArticleResponse(article);
   }
 
-  @Get()
-  findAll() {
-    return this.articleService.findAll();
-  }
-
   @Get(':slug')
   async findOne(
     @Param('slug') slug: string
-  ): Promise<ArticleResponseinterface> {
+  ): Promise<ArticleResponseInterface> {
     const article = await this.articleService.findOne(slug);
     if (!article)
       throw new HttpException('No article found', HttpStatus.NOT_FOUND);
@@ -54,9 +46,19 @@ export class ArticleController {
     return this.articleService.buildArticleResponse(article);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateArticleDto: UpdateArticleDto) {
-    return this.articleService.update(+id, updateArticleDto);
+  @Put(':slug')
+  @UseGuards(AuthGuard)
+  async update(
+    @User() user: UserEntity,
+    @Param('slug') slug: string,
+    @Body('article') updateArticleDto: UpdateArticleDto
+  ): Promise<ArticleResponseInterface> {
+    const updatedArticle = await this.articleService.update(
+      slug,
+      user,
+      updateArticleDto
+    );
+    return this.articleService.buildArticleResponse(updatedArticle);
   }
 
   @Delete(':slug')

@@ -84,9 +84,9 @@ export class UserService {
         'Unexpected db error',
         HttpStatus.INTERNAL_SERVER_ERROR
       );
+    Object.assign(user, updateUserDto);
 
-    const updatedUser = { ...user, ...updateUserDto };
-    return this.repository.save(updatedUser);
+    return this.repository.save(user);
   }
 
   // #endregion

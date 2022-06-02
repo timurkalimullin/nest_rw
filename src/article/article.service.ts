@@ -5,7 +5,7 @@ import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { ArticleEntity } from './entities/article.entity';
 import { UserEntity } from '../user/entities/user.entity';
-import { ArticleResponseinterface } from './types/articleResponse.interface';
+import { ArticleResponseInterface } from './types/articleResponse.interface';
 import { generateSlug } from '../common/helpers';
 
 @Injectable()
@@ -39,23 +39,30 @@ export class ArticleService {
     });
   }
 
-  update(id: number, updateArticleDto: UpdateArticleDto) {
-    return `This action updates a #${id} article`;
+  async update(
+    slug: string,
+    user: UserEntity,
+    updateArticleDto: UpdateArticleDto
+  ) {
+    const article = (await this.findOne(slug)) as ArticleEntity;
+
+    this.checkArticleAuthor(article, user);
+
+    if (updateArticleDto?.title && updateArticleDto?.title !== article?.title) {
+      const updatedSlug = generateSlug(updateArticleDto?.title);
+      article.slug = updatedSlug;
+    }
+
+    Object.assign(article, updateArticleDto);
+
+    return this.repository.save(article);
   }
 
   async remove(user: UserEntity, slug: string): Promise<DeleteResult> {
     const currentArticle = await this.findOne(slug);
 
-    if (!currentArticle) {
-      throw new HttpException('No article found', HttpStatus.NOT_FOUND);
-    }
+    this.checkArticleAuthor(currentArticle, user);
 
-    if (currentArticle?.author.id !== user.id) {
-      throw new HttpException(
-        'no permission for dlete articles',
-        HttpStatus.FORBIDDEN
-      );
-    }
     return await this.repository.delete({ slug });
   }
 
@@ -63,8 +70,26 @@ export class ArticleService {
 
   //#region Helpers
 
-  buildArticleResponse(article: ArticleEntity): ArticleResponseinterface {
+  buildArticleResponse(article: ArticleEntity): ArticleResponseInterface {
     return { article };
+  }
+
+  checkArticleAuthor(
+    article: ArticleEntity | null,
+    user: UserEntity
+  ): article is ArticleEntity {
+    if (!article) {
+      throw new HttpException('No article found', HttpStatus.NOT_FOUND);
+    }
+
+    if (article?.author.id !== user.id) {
+      throw new HttpException(
+        'No permission for delete articles',
+        HttpStatus.FORBIDDEN
+      );
+    }
+
+    return true;
   }
 
   //#endregion
