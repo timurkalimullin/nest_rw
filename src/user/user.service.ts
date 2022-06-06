@@ -102,7 +102,9 @@ export class UserService {
 
   generateJwt(user: UserType) {
     const { id, email, username } = user;
-    return sign({ id, email, username }, process.env.JWT_SECRET);
+    return sign({ id, email, username }, process.env.JWT_SECRET, {
+      expiresIn: '1h',
+    });
   }
 
   // #endregion
