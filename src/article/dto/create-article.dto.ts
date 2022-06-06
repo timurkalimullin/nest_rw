@@ -13,5 +13,5 @@ export class CreateArticleDto {
   readonly body: string;
 
   @Allow()
-  readonly taglist?: string[];
+  readonly tagList?: string[];
 }

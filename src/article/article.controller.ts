@@ -9,6 +9,7 @@ import {
   HttpStatus,
   HttpException,
   Put,
+  Query,
 } from '@nestjs/common';
 import { User } from 'src/common/decorators/user.decorator';
 import { UserEntity } from 'src/user/entities/user.entity';
@@ -17,10 +18,19 @@ import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { AuthGuard } from '../common/guards/auth.guard';
 import { ArticleResponseInterface } from './types/articleResponse.interface';
+import { TotalArticlesResponseInterface } from './types/totalArticlesResponse.interface';
 
 @Controller('articles')
 export class ArticleController {
   constructor(private readonly articleService: ArticleService) {}
+
+  @Get()
+  async findAAll(
+    @User('id') currentUserId: string,
+    @Query() query: any
+  ): Promise<TotalArticlesResponseInterface> {
+    return await this.articleService.findAll(currentUserId, query);
+  }
 
   @Post()
   @UseGuards(AuthGuard)

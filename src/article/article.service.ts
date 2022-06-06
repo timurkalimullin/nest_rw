@@ -7,12 +7,15 @@ import { ArticleEntity } from './entities/article.entity';
 import { UserEntity } from '../user/entities/user.entity';
 import { ArticleResponseInterface } from './types/articleResponse.interface';
 import { generateSlug } from '../common/helpers';
+import { TotalArticlesResponseInterface } from './types/totalArticlesResponse.interface';
 
 @Injectable()
 export class ArticleService {
   constructor(
     @InjectRepository(ArticleEntity)
-    private readonly repository: Repository<ArticleEntity>
+    private readonly repository: Repository<ArticleEntity>,
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>
   ) {}
 
   //#region Main
@@ -29,8 +32,40 @@ export class ArticleService {
     return await this.repository.save(article);
   }
 
-  findAll() {
-    return `This action returns all article`;
+  async findAll(
+    id: string,
+    query: any
+  ): Promise<TotalArticlesResponseInterface> {
+    const queryBuilder = await this.repository
+      .createQueryBuilder('articles')
+      .leftJoinAndSelect('articles.author', 'author')
+      .orderBy('articles.createdAt', 'DESC');
+
+    const articlesCount = await queryBuilder.getCount();
+
+    if (query.tag) {
+      queryBuilder.andWhere('articles.tagList LIKE :tag', {
+        tag: `%${query.tag}%`,
+      });
+    }
+
+    if (query.limit) {
+      queryBuilder.limit(query.limit);
+    }
+
+    if (query.offset) {
+      queryBuilder.offset(query.offset);
+    }
+
+    if (query.author) {
+      const author = await this.userRepository.findOne({
+        where: { username: query.author },
+      });
+      queryBuilder.andWhere('articles.authorId = :id', { id: author?.id });
+    }
+
+    const articles = await queryBuilder.getMany();
+    return { articles, articlesCount };
   }
 
   async findOne(slug: string): Promise<ArticleEntity | null> {
