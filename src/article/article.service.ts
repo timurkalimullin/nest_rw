@@ -101,6 +101,31 @@ export class ArticleService {
     return await this.repository.delete({ slug });
   }
 
+  async addArticleToFavorites(
+    userId: string,
+    slug: string
+  ): Promise<ArticleEntity> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['favorites'],
+    });
+    const article = (await this.findOne(slug)) as ArticleEntity;
+
+    this.checkArticleAuthor(article, user);
+
+    const isNotFavorited =
+      user?.favorites.findIndex((art) => art.id === article.id) === -1;
+
+    if (isNotFavorited) {
+      user.favorites.push(article);
+      article.favoritesCount += 1;
+      await this.userRepository.save(user);
+      await this.repository.save(article);
+    }
+
+    return article;
+  }
+
   //#endregion
 
   //#region Helpers
@@ -111,17 +136,14 @@ export class ArticleService {
 
   checkArticleAuthor(
     article: ArticleEntity | null,
-    user: UserEntity
+    user: UserEntity | null
   ): article is ArticleEntity {
     if (!article) {
       throw new HttpException('No article found', HttpStatus.NOT_FOUND);
     }
 
-    if (article?.author.id !== user.id) {
-      throw new HttpException(
-        'No permission for delete articles',
-        HttpStatus.FORBIDDEN
-      );
+    if (article?.author.id !== user?.id) {
+      throw new HttpException('No permission for action', HttpStatus.FORBIDDEN);
     }
 
     return true;
