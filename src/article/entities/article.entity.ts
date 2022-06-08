@@ -10,6 +10,11 @@ import {
   BeforeInsert,
 } from 'typeorm';
 
+export type ArticleType = Omit<
+  ArticleEntity,
+  'createTaglist' | 'updateTimestamp'
+>;
+
 @Entity({ name: 'articles' })
 export class ArticleEntity {
   @PrimaryGeneratedColumn('uuid')

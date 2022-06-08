@@ -49,7 +49,7 @@ export class ArticleController {
   async findOne(
     @Param('slug') slug: string
   ): Promise<ArticleResponseInterface> {
-    const article = await this.articleService.findOne(slug);
+    const article = await this.articleService.findByKey(slug);
     if (!article)
       throw new HttpException('No article found', HttpStatus.NOT_FOUND);
 
@@ -84,6 +84,19 @@ export class ArticleController {
     @Param('slug') slug: string
   ): Promise<ArticleResponseInterface> {
     const article = await this.articleService.addArticleToFavorites(
+      userId,
+      slug
+    );
+    return this.articleService.buildArticleResponse(article);
+  }
+
+  @Delete(':slug/favorite')
+  @UseGuards(AuthGuard)
+  async deleteArticleFromFavorites(
+    @User('id') userId: string,
+    @Param('slug') slug: string
+  ): Promise<ArticleResponseInterface> {
+    const article = await this.articleService.deleteArticleFromFavorites(
       userId,
       slug
     );
