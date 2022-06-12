@@ -15,7 +15,7 @@ module.exports = {
     node: true,
     jest: true,
   },
-  ignorePatterns: ['.eslintrc.js', 'src/migrations/**/*'],
+  ignorePatterns: ['.eslintrc.js', 'src/common/migrations/**/*', 'src/common/seeds/**/*'],
   rules: {
     'prettier/prettier': [
       'error',

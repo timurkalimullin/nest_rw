@@ -61,7 +61,7 @@ export class ArticleService {
       const author = await this.userRepository.findOne({
         where: { username: query.author },
       });
-      queryBuilder.andWhere('articles.author.id = :id', { id: author?.id });
+      queryBuilder.andWhere('articles.authorId = :id', { id: author?.id });
     }
 
     if (query.favorited) {
