@@ -61,7 +61,7 @@ export class ArticleService {
       const author = await this.userRepository.findOne({
         where: { username: query.author },
       });
-      queryBuilder.andWhere('articles.authorId = :id', { id: author?.id });
+      queryBuilder.andWhere('articles.author.id = :id', { id: author?.id });
     }
 
     if (query.favorited) {
@@ -86,7 +86,6 @@ export class ArticleService {
         relations: ['favorites'],
       });
       favoriteIds = currentUser?.favorites.map((favorite) => favorite.id);
-      console.log('fav', favoriteIds, currentUser);
     }
     const articles = await queryBuilder.getMany();
     const articlesWithFavorited = articles.map((article) => {
