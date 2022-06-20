@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeleteResult, Repository } from 'typeorm';
+import { DeleteResult, getRepository, Repository } from 'typeorm';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { ArticleEntity } from './entities/article.entity';
@@ -8,6 +8,7 @@ import { UserEntity } from '../user/entities/user.entity';
 import { ArticleResponseInterface } from './types/articleResponse.interface';
 import { generateSlug } from '../common/helpers';
 import { TotalArticlesResponseInterface } from './types/totalArticlesResponse.interface';
+import { FollowEntity } from '../profile/entities/follow.entity';
 
 @Injectable()
 export class ArticleService {
@@ -15,7 +16,9 @@ export class ArticleService {
     @InjectRepository(ArticleEntity)
     private readonly repository: Repository<ArticleEntity>,
     @InjectRepository(UserEntity)
-    private readonly userRepository: Repository<UserEntity>
+    private readonly userRepository: Repository<UserEntity>,
+    @InjectRepository(FollowEntity)
+    private readonly followRepository: Repository<FollowEntity>
   ) {}
 
   //#region Main
@@ -171,6 +174,43 @@ export class ArticleService {
     }
 
     return article;
+  }
+
+  async getFeed(
+    currentUserId: string,
+    query: any
+  ): Promise<TotalArticlesResponseInterface> {
+    const follows = await this.followRepository.find({
+      where: {
+        followerId: currentUserId,
+      },
+    });
+
+    if (follows.length === 0) {
+      return { articles: [], articlesCount: 0 };
+    }
+
+    const followingUserIds = follows.map((follow) => follow.followingId);
+    const queryBuilder = getRepository(ArticleEntity)
+      .createQueryBuilder('articles')
+      .leftJoinAndSelect('articles.author', 'author')
+      .where('articles.authorId IN (:...ids)', { ids: followingUserIds });
+
+    queryBuilder.orderBy('articles.createdAt', 'DESC');
+
+    const articlesCount = await queryBuilder.getCount();
+
+    if (query.limit) {
+      queryBuilder.limit(query.limit);
+    }
+
+    if (query.offset) {
+      queryBuilder.offset(query.offset);
+    }
+
+    const articles = await queryBuilder.getMany();
+
+    return { articles, articlesCount };
   }
 
   //#endregion

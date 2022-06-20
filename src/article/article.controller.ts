@@ -102,4 +102,13 @@ export class ArticleController {
     );
     return this.articleService.buildArticleResponse(article);
   }
+
+  @Get('feed')
+  @UseGuards(AuthGuard)
+  async getFeed(
+    @User('id') userId: string,
+    @Query() query: any
+  ): Promise<TotalArticlesResponseInterface> {
+    return await this.articleService.getFeed(userId, query);
+  }
 }
